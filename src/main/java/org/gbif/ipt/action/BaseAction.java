@@ -1,10 +1,16 @@
 package org.gbif.ipt.action;
 
-import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.Preparable;
-import com.opensymphony.xwork2.util.ValueStack;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.UriBuilder;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.struts2.interceptor.ServletRequestAware;
@@ -18,11 +24,12 @@ import org.gbif.ipt.service.admin.RegistrationManager;
 import org.gbif.ipt.struts2.SimpleTextProvider;
 import org.gbif.ws.util.XSSUtil;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.UriBuilder;
-import java.util.*;
+import com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Preparable;
+import com.opensymphony.xwork2.util.ValueStack;
 
 /**
  * The base of all IPT actions. This handles conditions such as menu items, a custom text provider, sessions, currently
@@ -166,13 +173,23 @@ public class BaseAction extends ActionSupport implements SessionAware, Preparabl
     return Locale.ENGLISH.getLanguage();
   }
 
+  /**
+   * Gets the provided locale. in ActionContext.
+   *
+   * fix #1449 NPE on none struts context.
+   */
+  @Override
+  public Locale getLocale() {
+      return (ActionContext.getContext() != null) ? super.getLocale() : null;
+  }
+
   @Override
   public String getText(String key) {
     return textProvider.getText(this, key, null, new String[0]);
   }
 
   @Override
-  public String getText(String key, List args) {
+  public String getText(String key, List<?> args) {
     return textProvider.getText(this, key, null, args);
   }
 
@@ -182,12 +199,12 @@ public class BaseAction extends ActionSupport implements SessionAware, Preparabl
   }
 
   @Override
-  public String getText(String key, String defaultValue, List args) {
+  public String getText(String key, String defaultValue, List<?> args) {
     return textProvider.getText(this, key, defaultValue, args);
   }
 
   @Override
-  public String getText(String key, String defaultValue, List args, ValueStack stack) {
+  public String getText(String key, String defaultValue, List<?> args, ValueStack stack) {
     return textProvider.getText(this, key, defaultValue, args);
   }
 
